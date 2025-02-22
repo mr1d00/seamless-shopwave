@@ -35,7 +35,9 @@ export const ProductModal = ({
             </div>
             <div className="p-6">
               <h2 className="text-2xl font-semibold text-gray-900">{product.name}</h2>
-              <p className="mt-2 text-gray-600">{product.description}</p>
+              <div className="mt-2 max-h-[200px] overflow-y-auto pr-2 scrollbar-thin">
+                <p className="text-gray-600">{product.description}</p>
+              </div>
               <div className="mt-4">
                 <p className="text-3xl font-semibold text-primary">
                   ${product.price.toFixed(2)}
