@@ -1,55 +1,18 @@
 
-import { Search, ShoppingCart, X } from "lucide-react";
-import { useState } from "react";
+import { ShoppingCart } from "lucide-react";
 
 export const Navigation = ({ 
   onCartClick, 
-  cartItemsCount,
-  onSearch 
+  cartItemsCount
 }: { 
   onCartClick: () => void;
   cartItemsCount: number;
-  onSearch: (query: string) => void;
 }) => {
-  const [searchQuery, setSearchQuery] = useState("");
-
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const query = e.target.value;
-    setSearchQuery(query);
-    onSearch(query);
-  };
-
-  const handleClearSearch = () => {
-    setSearchQuery("");
-    onSearch("");
-  };
-
   return (
     <nav className="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-md z-50 border-b border-gray-100">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <div className="flex-1">
           <h1 className="text-xl font-semibold text-primary">Elegant Shop</h1>
-        </div>
-        
-        <div className="flex-1 max-w-md">
-          <div className="relative">
-            <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-            <input
-              type="search"
-              placeholder="Search products..."
-              className="w-full pl-10 pr-10 py-2 rounded-full bg-accent/50 border-0 focus:ring-2 focus:ring-primary/20 focus:outline-none"
-              value={searchQuery}
-              onChange={handleSearch}
-            />
-            {searchQuery && (
-              <button
-                onClick={handleClearSearch}
-                className="absolute right-3 top-2.5 p-0.5 rounded-full hover:bg-gray-100 transition-colors"
-              >
-                <X className="h-4 w-4 text-gray-400" />
-              </button>
-            )}
-          </div>
         </div>
         
         <div className="flex-1 flex justify-end">

@@ -4,6 +4,7 @@ import { Navigation } from "../components/Navigation";
 import { ProductCard } from "../components/ProductCard";
 import { ProductModal } from "../components/ProductModal";
 import { CartModal } from "../components/CartModal";
+import { CarouselHeader } from "../components/CarouselHeader";
 import { Product, CartItem } from "../types";
 
 // Sample products data
@@ -90,10 +91,13 @@ const Index = () => {
       <Navigation 
         onCartClick={() => setIsCartOpen(true)} 
         cartItemsCount={cartItems.length}
-        onSearch={handleSearch}
       />
       
-      <main className="container mx-auto px-4 pt-24 pb-12">
+      <div className="pt-16">
+        <CarouselHeader onSearch={handleSearch} />
+      </div>
+      
+      <main className="container mx-auto px-4 pt-16 pb-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {filteredProducts.map((product) => (
             <ProductCard
