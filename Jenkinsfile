@@ -37,8 +37,8 @@ pipeline {
             steps {
                 script {
                     // Apply Kubernetes manifests to deploy the app to Minikube
-                    sh 'kubectl apply -f deployment.yaml'
-                    sh 'kubectl apply -f service.yaml'
+                    sh 'kubectl apply -f Kubernetes/deployment.yaml'
+                    sh 'kubectl apply -f Kubernetes/service.yaml'
                 }
             }
         }
