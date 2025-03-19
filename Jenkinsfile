@@ -1,10 +1,10 @@
 pipeline {
     agent any
     environment {
-        IMAGE_NAME = 'nodejs-app'
-        DOCKER_REGISTRY = 'localhost:5000'  // Minikube registry (can use local registry)
-        IMAGE_TAG = 'latest'
-        MINIKUBE_IP = sh(script: 'minikube ip', returnStdout: true).trim() // Minikube IP for services
+        DOCKER_IMAGE = "<mridul4/website>"
+        DOCKER_TAG = "latest"
+        DOCKER_REGISTRY = "docker.io"
+        K8S_NAMESPACE = "default"
     }
 
     stages {
@@ -17,8 +17,8 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    // Build the Docker image
-                    docker.build(IMAGE_NAME)
+                    // Build Docker image
+                    sh 'docker build -t $DOCKER_IMAGE:$DOCKER_TAG .'
                 }
             }
         }
@@ -39,15 +39,7 @@ pipeline {
                     // Apply Kubernetes manifests to deploy the app to Minikube
                     sh 'kubectl apply -f Kubernetes/deployment.yaml'
                     sh 'kubectl apply -f Kubernetes/service.yaml'
-                }
-            }
-        }
-
-        stage('Monitor Deployment') {
-            steps {
-                script {
-                    // Placeholder for Prometheus/Grafana setup if you have custom monitoring integration
-                    echo "Setup Prometheus/Grafana for monitoring"
+                     sh 'kubectl apply -f Kubernetes/canary-deployment.yaml'
                 }
             }
         }
