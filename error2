@@ -1,0 +1,56 @@
+pipeline {
+    agent any
+    environment {
+        // Define environment variables if needed, e.g., for Docker Hub login
+        DOCKER_IMAGE_NAME = 'nodejs-app'
+        DOCKER_TAG = 'latest'  // You can replace it with dynamic tags if required
+        DOCKERFILE_PATH = '.'  // The directory where the Dockerfile is located inside the repo (default is root)
+        DOCKER_REGISTRY = 'docker.io'
+        DOCKER_CREDENTIALS_ID = 'mridul-dockerhub'  // Jenkins credentials ID for Docker login
+    }
+
+    stages {  // Ensure the stages block starts here
+        stage('Clone Repository') {
+            steps {
+                git branch: 'main', url: 'https://github.com/mr1d00/seamless-shopwave.git'
+            }
+        }
+
+        stage('Docker Login') {
+    steps {
+        script {
+            // Login to Docker registry securely using Jenkins credentials
+            echo "Logging in to Docker registry..."
+            withCredentials([usernamePassword(credentialsId: "${DOCKER_CREDENTIALS_ID}", usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                sh """
+                    echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin $DOCKER_REGISTRY
+                """
+            }
+        }
+    }
+}
+
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    // Build Docker image using the Dockerfile inside the repo
+                    echo "Building Docker image..."
+                    sh """
+                        docker build -t ${DOCKER_IMAGE_NAME}:${DOCKER_TAG} ${DOCKERFILE_PATH}
+                    """
+                }
+            }
+        }
+
+        stage('Push Docker Image') {
+            steps {
+                script {
+                    echo "Pushing Docker image to registry..."
+                    sh """
+                        docker push ${DOCKER_IMAGE_NAME}:${DOCKER_TAG}
+                    """
+                }
+            }
+        }
+    }  // Ensure the stages block ends here
+}
