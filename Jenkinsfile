@@ -1,7 +1,7 @@
 pipeline {
     agent any
     environment {
-        DOCKER_IMAGE = "<mridul4/website>"
+        DOCKER_IMAGE = "mridul4/website"
         DOCKER_TAG = "latest"
         DOCKER_REGISTRY = "docker.io"
         K8S_NAMESPACE = "default"
