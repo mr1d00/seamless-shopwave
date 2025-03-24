@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: nodejs-app
-          image: nodejs-app:latest
+          image: mridul4/nodejs-app
           ports:
             - containerPort: 3000
 
