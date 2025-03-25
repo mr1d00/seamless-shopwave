@@ -1,35 +1,56 @@
 pipeline {
     agent any
     environment {
-        DOCKER_IMAGE = "mridul4/website"
-        DOCKER_TAG = "latest"
-        DOCKER_REGISTRY = "docker.io"
-        K8S_NAMESPACE = "default"
+        // Define environment variables
+        DOCKER_IMAGE_NAME = 'mridul4/nodejs-app'  // Use your Docker Hub username/repository
+        DOCKER_TAG = 'latest'  // You can replace it with dynamic tags if required
+        DOCKERFILE_PATH = '.'  // The directory where the Dockerfile is located inside the repo (default is root)
+        DOCKER_REGISTRY = 'docker.io'
+        DOCKER_CREDENTIALS_ID = 'project-docker-token'  // Jenkins credentials ID for Docker login
     }
 
     stages {
         stage('Clone Repository') {
             steps {
-                git 'https://github.com/mr1d00/seamless-shopwave.git'
+                echo "Cloning repository..."
+                git branch: 'main', url: 'https://github.com/mr1d00/seamless-shopwave.git'
+            }
+        }
+
+        stage('Docker Login') {
+            steps {
+                script {
+                    echo "Logging in to Docker registry..."
+                    // Login to Docker registry using Jenkins credentials
+                    withCredentials([usernamePassword(credentialsId: "${DOCKER_CREDENTIALS_ID}", usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                        sh """
+                            echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin $DOCKER_REGISTRY
+                        """
+                    }
+                }
             }
         }
 
         stage('Build Docker Image') {
             steps {
                 script {
+                    echo "Building Docker image..."
                     // Build Docker image
-                    sh 'docker build -t $DOCKER_IMAGE:$DOCKER_TAG .'
+                    sh """
+                        docker build -t ${DOCKER_IMAGE_NAME}:${DOCKER_TAG} ${DOCKERFILE_PATH}
+                    """
                 }
             }
         }
 
-        stage('Deploy to Minikube Kubernetes') {
+        stage('Push Docker Image') {
             steps {
                 script {
-                    // Apply Kubernetes manifests to deploy the app to Minikube
-                    sh 'kubectl apply -f Kubernetes/deployment.yaml'
-                    sh 'kubectl apply -f Kubernetes/service.yaml'
-                     sh 'kubectl apply -f Kubernetes/canary-deployment.yaml'
+                    echo "Pushing Docker image to registry..."
+                    // Push Docker image to the registry
+                    sh """
+                        docker push ${DOCKER_IMAGE_NAME}:${DOCKER_TAG}
+                    """
                 }
             }
         }
