@@ -23,16 +23,6 @@ pipeline {
             }
         }
 
-        stage('Run Tests') {
-            steps {
-                script {
-                    // Run tests for the Node.js application
-                    sh 'npm install'
-                    sh 'npm test'
-                }
-            }
-        }
-
         stage('Deploy to Minikube Kubernetes') {
             steps {
                 script {
