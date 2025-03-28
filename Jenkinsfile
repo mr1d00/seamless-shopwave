@@ -7,6 +7,7 @@ pipeline {
         DOCKERFILE_PATH = '.'  // The directory where the Dockerfile is located inside the repo (default is root)
         DOCKER_REGISTRY = 'docker.io'
         DOCKER_CREDENTIALS_ID = 'project-docker-token'  // Jenkins credentials ID for Docker login
+         KUBECONFIG = '/var/lib/jenkins/.kube/config'
     }
 
     stages {
@@ -51,6 +52,17 @@ pipeline {
                     sh """
                         docker push ${DOCKER_IMAGE_NAME}:${DOCKER_TAG}
                     """
+                }
+            }
+        }
+        
+         stage('Deploy to Minikube Kubernetes') {
+            steps {
+                script {
+                    // Apply Kubernetes manifests to deploy the app to Mini
+                    sh "kubectl apply -f Kubernetes/deployment.yaml"
+                    sh 'kubectl apply -f Kubernetes/service.yaml'
+                     sh 'kubectl apply -f Kubernetes/canary-deployment.yaml'
                 }
             }
         }
