@@ -1,0 +1,78 @@
+pipeline {
+    agent any
+
+    environment {
+        DOCKER_IMAGE_NAME = 'mridul4/nodejs-app'
+        DOCKER_TAG = 'latest'
+        DOCKERFILE_PATH = '.'
+        DOCKER_REGISTRY = 'docker.io'
+        DOCKER_CREDENTIALS_ID = 'project-docker-token'
+    }
+
+    stages {
+        stage('Clone Repository') {
+            steps {
+                echo "Cloning repository..."
+                git branch: 'main', url: 'https://github.com/mr1d00/seamless-shopwave.git'
+            }
+        }
+
+        stage('Docker Login') {
+            steps {
+                script {
+                    echo "Logging in to Docker registry..."
+                    withCredentials([
+                        usernamePassword(
+                            credentialsId: "${DOCKER_CREDENTIALS_ID}",
+                            usernameVariable: 'DOCKER_USERNAME',
+                            passwordVariable: 'DOCKER_PASSWORD'
+                        )
+                    ]) {
+                        sh """
+                            echo \$DOCKER_PASSWORD | docker login -u \$DOCKER_USERNAME --password-stdin $DOCKER_REGISTRY
+                        """
+                    }
+                }
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    echo "Building Docker image..."
+                    sh """
+                        docker build -t ${DOCKER_IMAGE_NAME}:${DOCKER_TAG} ${DOCKERFILE_PATH}
+                    """
+                }
+            }
+        }
+
+        stage('Push Docker Image') {
+            steps {
+                script {
+                    echo "Pushing Docker image to registry..."
+                    sh """
+                        docker push ${DOCKER_IMAGE_NAME}:${DOCKER_TAG}
+                    """
+                }
+            }
+        }
+
+        stage('Deploy to Minikube Kubernetes') {
+            steps {
+                script {
+                    echo "Deploying to Kubernetes..."
+                    withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
+                        sh '''
+                            export KUBECONFIG=$KUBECONFIG
+                            kubectl get pods
+                            kubectl apply -f Kubernetes/deployment.yaml
+                            kubectl apply -f Kubernetes/service.yaml
+                            kubectl apply -f Kubernetes/canary-deployment.yaml
+                        '''
+                    }
+                }
+            }
+        }
+    }
+}
